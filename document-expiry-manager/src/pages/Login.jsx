@@ -120,11 +120,35 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="action-primary w-full">
+            <button
+              type="submit"
+              disabled={loading}
+              className="action-primary w-full"
+            >
               {loading ? "Signing in..." : "Open dashboard"}
             </button>
 
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-3 text-center text-sm text-slate-500">
+              <div className="mb-3 flex items-center justify-between gap-4 text-left">
+                <label
+                  htmlFor="remember-me"
+                  className="flex items-center gap-2 text-sm text-slate-600"
+                >
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  />
+                  <span>Remember me</span>
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-teal-700 transition hover:text-teal-800"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               Need an account?{" "}
               <Link
                 to="/register"

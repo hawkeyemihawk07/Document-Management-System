@@ -56,13 +56,10 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        },
-      );
+      const response = await axios.post("/api/auth/login", {
+        email,
+        password,
+      });
 
       const nextToken = response.data?.token;
       const nextUser = response.data?.user;
@@ -104,14 +101,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        {
-          name,
-          email,
-          password,
-        },
-      );
+      const response = await axios.post("/api/auth/register", {
+        name,
+        email,
+        password,
+      });
 
       const nextToken = response.data?.token;
       const nextUser = response.data?.user;

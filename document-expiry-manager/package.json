@@ -4,20 +4,29 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "generate:tailwind": "node ./scripts/generate-tailwind.mjs",
+    "predev": "npm.cmd run generate:tailwind",
+    "dev": "vite --host 127.0.0.1 --port 3000",
+    "prebuild": "npm.cmd run generate:tailwind",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/node": "^4.2.1",
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.2.1",
     "axios": "^1.13.6",
+    "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
+    "lightningcss": "^1.32.0",
+    "lightningcss-win32-x64-msvc": "^1.32.0",
+    "nodemailer": "^8.0.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.6.0",
-    "react-router-dom": "^7.13.1"
+    "react-router-dom": "^7.13.1",
+    "twilio": "^5.13.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
