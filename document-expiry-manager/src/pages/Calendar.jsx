@@ -10,6 +10,10 @@ import {
 import Navbar from "../components/Navbar";
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 import { getStoredDocuments } from "../utils/documentStorage";
+import {
+  getDocumentExpiryDate,
+  normalizeDocuments,
+} from "../utils/documentRecords";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -19,7 +23,7 @@ const Calendar = () => {
     const fetchDocuments = async () => {
       try {
         const response = await axios.get("/api/documents");
-        setDocuments(response.data);
+        setDocuments(normalizeDocuments(response.data));
       } catch (error) {
         console.error("Error fetching documents:", error);
         setDocuments(getStoredDocuments());
@@ -36,7 +40,10 @@ const Calendar = () => {
   };
 
   const getDocumentsForDate = (date) => {
-    return documents.filter((doc) => isSameDay(new Date(doc.expiryDate), date));
+    return documents.filter((doc) => {
+      const expiryDate = getDocumentExpiryDate(doc);
+      return expiryDate ? isSameDay(expiryDate, date) : false;
+    });
   };
 
   const nextMonth = () => {

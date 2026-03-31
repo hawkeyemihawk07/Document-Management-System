@@ -17,6 +17,11 @@ import {
   HiOutlineX,
 } from "react-icons/hi";
 import { getStoredDocuments, removeStoredDocument } from "../utils/documentStorage";
+import {
+  getDocumentExpiryDate,
+  getSearchableDocumentValue,
+  normalizeDocuments,
+} from "../utils/documentRecords";
 
 const FILTER_TYPES = {
   ALL: "all",
@@ -38,7 +43,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = await axios.get("/api/documents");
-        setDocuments(response.data);
+        setDocuments(normalizeDocuments(response.data));
       } catch (error) {
         console.error("Error fetching documents:", error);
         setDocuments(getStoredDocuments());
@@ -54,17 +59,28 @@ const Dashboard = () => {
     const today = new Date();
 
     const expiringSoon = documents.filter((doc) => {
-      const daysLeft = differenceInDays(new Date(doc.expiryDate), today);
+      const expiryDate = getDocumentExpiryDate(doc);
+      if (!expiryDate) {
+        return false;
+      }
+
+      const daysLeft = differenceInDays(expiryDate, today);
       return daysLeft <= 30 && daysLeft > 0;
     }).length;
 
-    const expired = documents.filter((doc) =>
-      isBefore(new Date(doc.expiryDate), today),
-    ).length;
+    const expired = documents.filter((doc) => {
+      const expiryDate = getDocumentExpiryDate(doc);
+      return expiryDate ? isBefore(expiryDate, today) : false;
+    }).length;
 
     const monthlyCost = documents
       .filter((doc) => {
-        const daysLeft = differenceInDays(new Date(doc.expiryDate), today);
+        const expiryDate = getDocumentExpiryDate(doc);
+        if (!expiryDate) {
+          return false;
+        }
+
+        const daysLeft = differenceInDays(expiryDate, today);
         return daysLeft <= 30 && daysLeft > 0;
       })
       .reduce((sum, doc) => sum + (doc.cost || 0), 0);
@@ -80,17 +96,18 @@ const Dashboard = () => {
   const filteredDocs = useMemo(() => {
     return documents.filter((doc) => {
       const today = new Date();
-      const daysLeft = differenceInDays(new Date(doc.expiryDate), today);
+      const expiryDate = getDocumentExpiryDate(doc);
+      const daysLeft = expiryDate ? differenceInDays(expiryDate, today) : null;
 
       switch (filter) {
         case FILTER_TYPES.ACTIVE:
-          if (daysLeft <= 30) return false;
+          if (daysLeft === null || daysLeft <= 30) return false;
           break;
         case FILTER_TYPES.EXPIRING:
-          if (daysLeft > 30 || daysLeft <= 0) return false;
+          if (daysLeft === null || daysLeft > 30 || daysLeft <= 0) return false;
           break;
         case FILTER_TYPES.EXPIRED:
-          if (daysLeft > 0) return false;
+          if (daysLeft === null || daysLeft > 0) return false;
           break;
         default:
           break;
@@ -99,12 +116,16 @@ const Dashboard = () => {
       if (searchTerm) {
         const normalizedSearchTerm = searchTerm.toLowerCase();
         return (
-          doc.title.toLowerCase().includes(normalizedSearchTerm) ||
-          doc.category.toLowerCase().includes(normalizedSearchTerm) ||
-          (doc.documentNumber &&
-            doc.documentNumber.toLowerCase().includes(normalizedSearchTerm)) ||
-          (doc.issuingAuthority &&
-            doc.issuingAuthority.toLowerCase().includes(normalizedSearchTerm))
+          getSearchableDocumentValue(doc.title).includes(normalizedSearchTerm) ||
+          getSearchableDocumentValue(doc.category).includes(
+            normalizedSearchTerm,
+          ) ||
+          getSearchableDocumentValue(doc.documentNumber).includes(
+            normalizedSearchTerm,
+          ) ||
+          getSearchableDocumentValue(doc.issuingAuthority).includes(
+            normalizedSearchTerm,
+          )
         );
       }
 

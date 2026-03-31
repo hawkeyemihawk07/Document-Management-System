@@ -64,6 +64,27 @@ const extractCandidates = (content) => {
   return candidates;
 };
 
+const writeGeneratedCss = async (output) => {
+  try {
+    await fs.writeFile(outputCssPath, output, "utf8");
+    return "updated";
+  } catch (error) {
+    if (!["EPERM", "EACCES"].includes(error.code)) {
+      throw error;
+    }
+
+    try {
+      await fs.access(outputCssPath);
+      console.warn(
+        `Warning: could not update ${path.relative(projectRoot, outputCssPath)} because it is locked. Reusing the existing generated CSS file.`,
+      );
+      return "reused";
+    } catch {
+      throw error;
+    }
+  }
+};
+
 const main = async () => {
   const css = await fs.readFile(sourceCssPath, "utf8");
   const sourceFiles = await collectSourceFiles(path.join(projectRoot, "src"));
@@ -84,10 +105,10 @@ const main = async () => {
   });
 
   const output = compiled.build([...candidates]);
-  await fs.writeFile(outputCssPath, output, "utf8");
+  const outputStatus = await writeGeneratedCss(output);
 
   console.log(
-    `Generated ${path.relative(projectRoot, outputCssPath)} with ${candidates.size} candidates.`,
+    `${outputStatus === "updated" ? "Generated" : "Reused"} ${path.relative(projectRoot, outputCssPath)} with ${candidates.size} candidates.`,
   );
 };
 

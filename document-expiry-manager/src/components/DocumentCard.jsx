@@ -7,6 +7,10 @@ import {
   HiOutlineTrash,
   HiOutlineEye,
 } from "react-icons/hi";
+import {
+  getDocumentCategoryLabel,
+  getDocumentExpiryDate,
+} from "../utils/documentRecords";
 
 const categoryColors = {
   passport: "bg-violet-100 text-violet-700",
@@ -22,10 +26,19 @@ const categoryColors = {
 };
 
 const DocumentCard = ({ document, onDelete, onClick }) => {
-  const daysLeft = differenceInDays(new Date(document.expiryDate), new Date());
-  const isExpired = isBefore(new Date(document.expiryDate), new Date());
+  const expiryDate = getDocumentExpiryDate(document);
+  const daysLeft = expiryDate ? differenceInDays(expiryDate, new Date()) : null;
+  const isExpired = expiryDate ? isBefore(expiryDate, new Date()) : false;
 
   const getStatusBadge = () => {
+    if (!expiryDate) {
+      return (
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+          Needs review
+        </span>
+      );
+    }
+
     if (isExpired) {
       return (
         <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-medium text-rose-800">
@@ -68,7 +81,7 @@ const DocumentCard = ({ document, onDelete, onClick }) => {
               {document.title}
             </h3>
             <span className="text-sm capitalize text-slate-500">
-              {document.category.replace("_", " ")}
+              {getDocumentCategoryLabel(document.category)}
             </span>
           </div>
         </div>
@@ -78,7 +91,10 @@ const DocumentCard = ({ document, onDelete, onClick }) => {
       <div className="mb-5 space-y-3">
         <div className="flex items-center text-sm text-slate-600">
           <HiOutlineCalendar className="mr-2 h-4 w-4 text-teal-700" />
-          <span>Expires: {format(new Date(document.expiryDate), "dd MMM yyyy")}</span>
+          <span>
+            Expires:{" "}
+            {expiryDate ? format(expiryDate, "dd MMM yyyy") : "Not available"}
+          </span>
         </div>
 
         {document.cost > 0 && (
@@ -97,7 +113,11 @@ const DocumentCard = ({ document, onDelete, onClick }) => {
 
       <div className="flex items-center justify-between border-t border-slate-200 pt-4">
         <div className="text-sm">
-          {!isExpired ? (
+          {!expiryDate ? (
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+              Missing expiry date
+            </span>
+          ) : !isExpired ? (
             <span className="rounded-full bg-teal-50 px-3 py-1 font-medium text-teal-700">
               {daysLeft} days left
             </span>

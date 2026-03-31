@@ -1,8 +1,12 @@
+import { normalizeDocument, normalizeDocuments } from "./documentRecords";
+
 const DOCUMENTS_KEY = "demo_documents";
 
 export const getStoredDocuments = () => {
   try {
-    return JSON.parse(localStorage.getItem(DOCUMENTS_KEY) || "[]");
+    return normalizeDocuments(
+      JSON.parse(localStorage.getItem(DOCUMENTS_KEY) || "[]"),
+    );
   } catch {
     return [];
   }
@@ -18,11 +22,11 @@ export const normalizeDocumentPayload = (formData) => ({
 });
 
 export const createStoredDocument = (formData) => {
-  const document = {
+  const document = normalizeDocument({
     ...normalizeDocumentPayload(formData),
     _id: `demo-doc-${Date.now()}`,
     createdAt: new Date().toISOString(),
-  };
+  });
 
   const documents = getStoredDocuments();
   saveStoredDocuments([document, ...documents]);
@@ -30,7 +34,9 @@ export const createStoredDocument = (formData) => {
 };
 
 export const removeStoredDocument = (id) => {
-  const documents = getStoredDocuments().filter((doc) => doc._id !== id);
+  const documents = normalizeDocuments(
+    getStoredDocuments().filter((doc) => doc._id !== id),
+  );
   saveStoredDocuments(documents);
   return documents;
 };
