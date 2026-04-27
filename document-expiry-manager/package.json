@@ -5,21 +5,19 @@
   "type": "module",
   "scripts": {
     "generate:tailwind": "node ./scripts/generate-tailwind.mjs",
-    "predev": "npm.cmd run generate:tailwind",
+    "predev": "npm run generate:tailwind",
     "dev": "vite --host 127.0.0.1 --port 3000",
-    "prebuild": "npm.cmd run generate:tailwind",
+    "prebuild": "npm run generate:tailwind",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort"
   },
   "dependencies": {
     "@tailwindcss/node": "^4.2.1",
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.2.1",
     "axios": "^1.13.6",
     "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
     "lightningcss": "^1.32.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
     "nodemailer": "^8.0.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -9,10 +9,9 @@ import {
 } from "date-fns";
 import Navbar from "../components/Navbar";
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
-import { getStoredDocuments } from "../utils/documentStorage";
+import { mergeStoredDocuments } from "../utils/documentStorage";
 import {
   getDocumentExpiryDate,
-  normalizeDocuments,
 } from "../utils/documentRecords";
 
 const Calendar = () => {
@@ -23,10 +22,10 @@ const Calendar = () => {
     const fetchDocuments = async () => {
       try {
         const response = await axios.get("/api/documents");
-        setDocuments(normalizeDocuments(response.data));
+        setDocuments(mergeStoredDocuments(response.data));
       } catch (error) {
         console.error("Error fetching documents:", error);
-        setDocuments(getStoredDocuments());
+        setDocuments(mergeStoredDocuments([]));
       }
     };
 

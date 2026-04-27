@@ -16,11 +16,10 @@ import {
   HiOutlineSearch,
   HiOutlineX,
 } from "react-icons/hi";
-import { getStoredDocuments, removeStoredDocument } from "../utils/documentStorage";
+import { mergeStoredDocuments, removeStoredDocument } from "../utils/documentStorage";
 import {
   getDocumentExpiryDate,
   getSearchableDocumentValue,
-  normalizeDocuments,
 } from "../utils/documentRecords";
 
 const FILTER_TYPES = {
@@ -43,10 +42,10 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = await axios.get("/api/documents");
-        setDocuments(normalizeDocuments(response.data));
+        setDocuments(mergeStoredDocuments(response.data));
       } catch (error) {
         console.error("Error fetching documents:", error);
-        setDocuments(getStoredDocuments());
+        setDocuments(mergeStoredDocuments([]));
       } finally {
         setLoading(false);
       }

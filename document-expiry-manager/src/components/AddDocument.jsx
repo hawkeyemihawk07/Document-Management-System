@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
-import { createStoredDocument, normalizeDocumentPayload } from "../utils/documentStorage";
+import { normalizeDocumentPayload, upsertStoredDocument } from "../utils/documentStorage";
 
 const categories = [
   { value: "passport", label: "Passport" },
@@ -44,11 +44,21 @@ const AddDocument = () => {
     setLoading(true);
 
     try {
-      await axios.post("/api/documents", normalizeDocumentPayload(formData));
+      const response = await axios.post(
+        "/api/documents",
+        normalizeDocumentPayload(formData),
+      );
+      const createdDocument =
+        response.data?.document ?? response.data?.data ?? response.data;
+      upsertStoredDocument(createdDocument?.title ? createdDocument : formData);
       toast.success("Document added successfully!");
       navigate("/dashboard");
     } catch {
-      createStoredDocument(formData);
+      upsertStoredDocument({
+        ...formData,
+        _id: `demo-doc-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+      });
       toast.success("Document added locally. Backend is unavailable.");
       navigate("/dashboard");
     } finally {
